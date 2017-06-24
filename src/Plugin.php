@@ -39,7 +39,7 @@ class Plugin {
 
 	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = false) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
-		$settings = get_module_settings($serviceOrder->getModule());
+		$settings = get_module_settings(self::$module);
 		if ($regexMatch === false) {
 			$db = get_module_db(self::$module);
 			$ip = website_get_next_ip($serviceInfo[$settings['PREFIX'].'_server']);
@@ -70,7 +70,7 @@ class Plugin {
 
 	public static function doDisable(\Service_Order $serviceOrder) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
-		$settings = get_module_settings($serviceOrder->getModule());
+		$settings = get_module_settings(self::$module);
 	}
 
 	public static function getSettings(GenericEvent $event) {
