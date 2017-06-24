@@ -37,10 +37,10 @@ class Plugin {
 		$service->add_addon($addon);
 	}
 
-	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regex_match = false) {
+	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = false) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings($serviceOrder->getModule());
-		if ($regex_match === false) {
+		if ($regexMatch === false) {
 			$db = get_module_db(self::$module);
 			$ip = website_get_next_ip($serviceInfo[$settings['PREFIX'].'_server']);
 			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TITLE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeatInvoiceId.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
@@ -62,7 +62,7 @@ class Plugin {
 				admin_mail($subject, $settings['TBLNAME'] . " {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n" . $subject, $headers, false, 'admin_email_vps_no_ips.tpl');
 			}
 		} else {
-			$ip = $regex_match;
+			$ip = $regexMatch;
 			$GLOBALS['tf']->history->add(self::$module . 'queue', $serviceInfo[$settings['PREFIX'] . '_id'], 'ensure_addon_ip', $ip, $serviceInfo[$settings['PREFIX'] . '_custid']);
 			$db->query("update {$settings['PREFIX']}_ips set ips_main=0,ips_used=1,ips_{$settings['PREFIX']}={$id} where ips_ip='{$ip}'", __LINE__, __FILE__);
 		}
