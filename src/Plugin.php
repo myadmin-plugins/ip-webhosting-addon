@@ -37,10 +37,10 @@ class Plugin {
 		$service->addAddon($addon);
 	}
 
-	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = false) {
+	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
-		if ($regexMatch === false) {
+		if ($regexMatch === FALSE) {
 			$db = get_module_db(self::$module);
 			$id = $serviceInfo[$settings['PREFIX'].'_id'];
 			$ip = $serviceInfo[$settings['PREFIX'].'_ip'];
@@ -58,7 +58,7 @@ class Plugin {
 			$whm->set_auth_type('hash');
 			$whm->set_user($user);
 			$whm->set_hash($hash);
-			$accts = json_decode($whm->listips(), true);
+			$accts = json_decode($whm->listips(), TRUE);
 			$freeips = [];
 			$shared_ips = [];
 			foreach ($accts['result'] as $idx => $ipdata) {
@@ -89,11 +89,11 @@ class Plugin {
 						$headers .= 'Content-type: text/html; charset=UTF-8' . EMAIL_NEWLINE;
 						$headers .= 'From: ' . TITLE . ' <' . EMAIL_FROM . '>' . EMAIL_NEWLINE;
 						$subject = 'Error Setting IP ' . $ip . ' on ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['TITLE_FIELD']];
-						admin_mail($subject, $subject, $headers, false, 'admin_email_website_no_ips.tpl');
+						admin_mail($subject, $subject, $headers, FALSE, 'admin_email_website_no_ips.tpl');
 					}
 				} else {
 					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
-					admin_mail($subject, "Webserver {$id} Has Pending IPS<br>\n" . $subject, false, false, 'admin_email_website_no_ips.tpl');
+					admin_mail($subject, "Webserver {$id} Has Pending IPS<br>\n" . $subject, FALSE, FALSE, 'admin_email_website_no_ips.tpl');
 					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__);
 				}
 			} else {
