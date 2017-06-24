@@ -112,6 +112,6 @@ class Plugin {
 
 	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
-		$settings->add_text_setting(self::$module, 'Addon Costs', 'website_ip_cost', 'Webhosting Dedicated IP Cost:', 'This is the cost for purchasing an Dedicated IP on top of a Webhosting.', $settings->get_setting('WEBSITE_IP_COST'));
+		$settings->add_text_setting(self::$module, 'Costs & Limits', 'website_ip_cost', 'Dedicated IP Cost:', 'This is the cost for purchasing an additional IP on top of a Website.', (defined(WEBSITE_IP_COST) ? WEBSITE_IP_COST : 3));
 	}
 }
