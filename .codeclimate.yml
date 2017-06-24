@@ -1,0 +1,65 @@
+---
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript
+      - php
+    checks:
+      ExcessivePublicCount:
+        enabled: false
+      Similar code:
+        enabled: false
+      Identical code:
+        enabled: false
+  fixme:
+    enabled: true
+  phpmd:
+    enabled: true
+    config:
+      CyclomaticComplexity:
+        reportLevel: 100
+      ExcessiveClassComplexity:
+        maximum: 200
+      NpathComplexity:
+        minimum: 500
+      TooManyMethods:
+        maxmethods: 50
+      WeightedMethodCount:
+        maxmethods: 50
+      ExcessiveMethodLength:
+        minimum: 250
+        ignore-whitespace: true
+    checks:
+      Design/NpathComplexity:
+        enabled: false
+      Design/WeightedMethodCount:
+        enabled: false
+      Design/LongMethod:
+        enabled: false
+      CyclomaticComplexity:
+        enabled: false
+      ExcessivePublicCount:
+        enabled: false
+      Design/TooManyMethods:
+        enabled: false
+      Design/TooManyPublicMethods:
+        enabled: false
+      Naming/ShortVariable:
+        enabled: false
+      CleanCode/BooleanArgumentFlag:
+        enabled: false
+      Controversial/Superglobals:
+        enabled: false
+      CleanCode/ElseExpression:
+        enabled: false
+      CleanCode/StaticAccess:
+        enabled: false
+ratings:
+  paths:
+  - "**.inc"
+  - "**.js"
+  - "**.php"
+exclude_paths:
+- tests/
