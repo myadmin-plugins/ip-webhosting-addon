@@ -37,20 +37,20 @@ class Plugin {
 		$service->add_addon($addon);
 	}
 
-	public static function doEnable(\Service_Order $serviceOrder, $repeat_invoice_id, $regex_match = false) {
+	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regex_match = false) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings($serviceOrder->getModule());
 		if ($regex_match === false) {
 			$db = get_module_db(self::$module);
 			$ip = website_get_next_ip($serviceInfo[$settings['PREFIX'].'_server']);
-			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TITLE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeat_invoice_id.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TITLE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeatInvoiceId.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
 			if ($ip) {
 				$GLOBALS['tf']->history->add(self::$module . 'queue', $serviceInfo[$settings['PREFIX'] . '_id'], 'add_ip', $ip, $serviceInfo[$settings['PREFIX'] . '_custid']);
 				$description = 'Additional IP ' . $ip . ' for ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['PREFIX'] . '_id'];
-				$rdescription = '(Repeat Invoice: ' . $repeat_invoice_id . ') ' . $description;
+				$rdescription = '(Repeat Invoice: ' . $repeatInvoiceId . ') ' . $description;
 				$db->query("update {$settings['PREFIX']}_ips set ips_main=0,ips_used=1,ips_{$settings['PREFIX']}={$serviceInfo[$settings['PREFIX'].'_id']} where ips_ip='{$ip}'", __LINE__, __FILE__);
-				$db->query("update invoices set invoices_description='{$rdescription}' where invoices_type=1 and invoices_extra='{$repeat_invoice_id}'", __LINE__, __FILE__);
-				$db->query("update repeat_invoices set repeat_invoices_description='{$description}' where repeat_invoices_id='{$repeat_invoice_id}'", __LINE__, __FILE__);
+				$db->query("update invoices set invoices_description='{$rdescription}' where invoices_type=1 and invoices_extra='{$repeatInvoiceId}'", __LINE__, __FILE__);
+				$db->query("update repeat_invoices set repeat_invoices_description='{$description}' where repeat_invoices_id='{$repeatInvoiceId}'", __LINE__, __FILE__);
 			} else {
 				$db->query('SELECT * FROM ' . $settings['PREFIX'] . '_masters WHERE ' . $settings['PREFIX'] . '_id=' . $serviceInfo[$settings['PREFIX'] . '_server'], __LINE__, __FILE__);
 				$db->next_record(MYSQL_ASSOC);
