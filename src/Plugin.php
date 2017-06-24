@@ -42,29 +42,66 @@ class Plugin {
 		$settings = get_module_settings(self::$module);
 		if ($regexMatch === false) {
 			$db = get_module_db(self::$module);
-			$ip = website_get_next_ip($serviceInfo[$settings['PREFIX'].'_server']);
-			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TITLE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeatInvoiceId.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
-			if ($ip) {
-				$GLOBALS['tf']->history->add(self::$module . 'queue', $serviceInfo[$settings['PREFIX'] . '_id'], 'add_ip', $ip, $serviceInfo[$settings['PREFIX'] . '_custid']);
-				$description = 'Additional IP ' . $ip . ' for ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['PREFIX'] . '_id'];
-				$rdescription = '(Repeat Invoice: ' . $repeatInvoiceId . ') ' . $description;
-				$db->query("update {$settings['PREFIX']}_ips set ips_main=0,ips_used=1,ips_{$settings['PREFIX']}={$serviceInfo[$settings['PREFIX'].'_id']} where ips_ip='{$ip}'", __LINE__, __FILE__);
-				$db->query("update invoices set invoices_description='{$rdescription}' where invoices_type=1 and invoices_extra='{$repeatInvoiceId}'", __LINE__, __FILE__);
-				$db->query("update repeat_invoices set repeat_invoices_description='{$description}' where repeat_invoices_id='{$repeatInvoiceId}'", __LINE__, __FILE__);
+			$id = $serviceInfo[$settings['PREFIX'].'_id'];
+			$ip = $serviceInfo[$settings['PREFIX'].'_ip'];
+			$db->query("select * from website_masters where website_id='{$serviceInfo[$settings['PREFIX'].'_server']}'", __LINE__, __FILE__);
+			$db->next_record(MYSQL_ASSOC);
+			$serverdata = $db->Record;
+			$hash = $serverdata[$settings['PREFIX'].'_key'];
+			$user = 'root';
+			function_requirements('whm_api');
+			$whm = new \xmlapi($serverdata[$settings['PREFIX'].'_ip']);
+			//$whm->set_debug('true');
+			$whm->set_port('2087');
+			$whm->set_protocol('https');
+			$whm->set_output('json');
+			$whm->set_auth_type('hash');
+			$whm->set_user($user);
+			$whm->set_hash($hash);
+			$accts = json_decode($whm->listips(), true);
+			$freeips = [];
+			$shared_ips = [];
+			foreach ($accts['result'] as $idx => $ipdata) {
+				if ($ipdata['mainaddr'] == '1')
+					$main_ip = $ipdata['ip'];
+				if ($ipdata['used'] == 0 && $ipdata['active'] == 1)
+					$freeips[] = $ipdata['ip'];
+				if ($ipdata['dedicated'] == 0)
+					$shared_ips[] = $ipdata['ip'];
+			}
+			// check if ip is main or additional/dedicated.  if ip is main, get a new one
+			if (in_array($ip, $shared_ips)) {
+				myadmin_log(self::$module, 'info', "IP {$ip} (Shared) Main IP {$main_ip}", __LINE__, __FILE__);
+				if (sizeof($freeips) > 0) {
+					// assign new ip
+					$ip = $freeips[0];
+					$response = $whm->setsiteip($ip, $serviceInfo[$settings['PREFIX'].'_username']);
+					myadmin_log(self::$module, 'info', "WHM setsiteip({$ip}, {$serviceInfo[$settings['PREFIX'].'_username']}) Response: {$response}", __LINE__, __FILE__);
+					$response = json_decode($response);
+					if ($response->result[0]->status == 1) {
+						// update db w/ new ip
+						$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='$ip' where {$settings['PREFIX']}_id=$id", __LINE__, __FILE__);
+						myadmin_log(self::$module, 'info', "Gave Website {$id} IP {$ip}", __LINE__, __FILE__);
+					} else {
+						myadmin_log(self::$module, 'info', "Error Giving Website {$id} IP {$ip}", __LINE__, __FILE__);
+						$headers = '';
+						$headers .= 'MIME-Version: 1.0' . EMAIL_NEWLINE;
+						$headers .= 'Content-type: text/html; charset=UTF-8' . EMAIL_NEWLINE;
+						$headers .= 'From: ' . TITLE . ' <' . EMAIL_FROM . '>' . EMAIL_NEWLINE;
+						$subject = 'Error Setting IP ' . $ip . ' on ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['TITLE_FIELD']];
+						admin_mail($subject, $subject, $headers, false, 'admin_email_website_no_ips.tpl');
+					}
+				} else {
+					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
+					admin_mail($subject, "Webserver {$id} Has Pending IPS<br>\n" . $subject, false, false, 'admin_email_website_no_ips.tpl');
+					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__);
+				}
 			} else {
-				$db->query('SELECT * FROM ' . $settings['PREFIX'] . '_masters WHERE ' . $settings['PREFIX'] . '_id=' . $serviceInfo[$settings['PREFIX'] . '_server'], __LINE__, __FILE__);
-				$db->next_record(MYSQL_ASSOC);
-				$headers = '';
-				$headers .= 'MIME-Version: 1.0' . EMAIL_NEWLINE;
-				$headers .= 'Content-type: text/html; charset=UTF-8' . EMAIL_NEWLINE;
-				$headers .= 'From: ' . TITLE . ' <' . EMAIL_FROM . '>' . EMAIL_NEWLINE;
-				$subject = '0 Free IPs On ' . $settings['TBLNAME'] . ' Server ' . $db->Record[$settings['PREFIX'] . '_name'];
-				admin_mail($subject, $settings['TBLNAME'] . " {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n" . $subject, $headers, false, 'admin_email_vps_no_ips.tpl');
+				myadmin_log(self::$module, 'info', "IP {$ip} (Already Dedicated) Main IP {$main_ip}", __LINE__, __FILE__);
 			}
 		} else {
 			$ip = $regexMatch;
-			$GLOBALS['tf']->history->add(self::$module . 'queue', $serviceInfo[$settings['PREFIX'] . '_id'], 'ensure_addon_ip', $ip, $serviceInfo[$settings['PREFIX'] . '_custid']);
-			$db->query("update {$settings['PREFIX']}_ips set ips_main=0,ips_used=1,ips_{$settings['PREFIX']}={$id} where ips_ip='{$ip}'", __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', "IP {$ip} (Already Dedicated)", __LINE__, __FILE__);
 		}
 	}
 
