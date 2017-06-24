@@ -34,7 +34,7 @@ class Plugin {
 			->set_enable([__CLASS__, 'doEnable'])
 			->set_disable([__CLASS__, 'doDisable'])
 			->register();
-		$service->add_addon($addon);
+		$service->addAddon($addon);
 	}
 
 	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = false) {
