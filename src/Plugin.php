@@ -43,7 +43,7 @@ class Plugin {
 		if ($regex_match === false) {
 			$db = get_module_db(self::$module);
 			$ip = website_get_next_ip($serviceInfo[$settings['PREFIX'].'_server']);
-			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TTILE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeat_invoice_id.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', 'Trying To Give '.$settings['TITLE'].' '.$serviceInfo[$settings['PREFIX'] . '_id'].' Repeat Invoice '.$repeat_invoice_id.' IP ' . ($ip === false ? '<ip allocation failed>' : $ip), __LINE__, __FILE__);
 			if ($ip) {
 				$GLOBALS['tf']->history->add(self::$module . 'queue', $serviceInfo[$settings['PREFIX'] . '_id'], 'add_ip', $ip, $serviceInfo[$settings['PREFIX'] . '_custid']);
 				$description = 'Additional IP ' . $ip . ' for ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['PREFIX'] . '_id'];
