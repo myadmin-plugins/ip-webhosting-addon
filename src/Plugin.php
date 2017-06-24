@@ -30,8 +30,7 @@ class Plugin {
 		$addon->setModule(self::$module)
 			->set_text('Dedicated IP')
 			->set_text_match('Dedicated IP (.*)')
-			->set_cost(Webhosting_IP_COST)
-			->set_require_ip(TRUE)
+			->set_cost(WEBSITE_IP_COST)
 			->set_enable([__CLASS__, 'doEnable'])
 			->set_disable([__CLASS__, 'doDisable'])
 			->register();
