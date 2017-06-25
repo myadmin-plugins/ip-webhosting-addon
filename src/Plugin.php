@@ -60,17 +60,17 @@ class Plugin {
 			$whm->set_hash($hash);
 			$accts = json_decode($whm->listips(), TRUE);
 			$freeips = [];
-			$shared_ips = [];
+			$sharedIps = [];
 			foreach ($accts['result'] as $idx => $ipdata) {
 				if ($ipdata['mainaddr'] == '1')
 					$main_ip = $ipdata['ip'];
 				if ($ipdata['used'] == 0 && $ipdata['active'] == 1)
 					$freeips[] = $ipdata['ip'];
 				if ($ipdata['dedicated'] == 0)
-					$shared_ips[] = $ipdata['ip'];
+					$sharedIps[] = $ipdata['ip'];
 			}
 			// check if ip is main or additional/dedicated.  if ip is main, get a new one
-			if (in_array($ip, $shared_ips)) {
+			if (in_array($ip, $sharedIps)) {
 				myadmin_log(self::$module, 'info', "IP {$ip} (Shared) Main IP {$main_ip}", __LINE__, __FILE__);
 				if (sizeof($freeips) > 0) {
 					// assign new ip
