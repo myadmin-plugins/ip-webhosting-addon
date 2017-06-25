@@ -87,8 +87,8 @@ class Plugin {
 						$headers = '';
 						$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
 						$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-						$headers .= 'From: '.TITLE . ' <'.EMAIL_FROM . '>'.EMAIL_NEWLINE;
-						$subject = 'Error Setting IP '.$ip . ' on '.$settings['TBLNAME'] . ' '.$serviceInfo[$settings['TITLE_FIELD']];
+						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+						$subject = 'Error Setting IP '.$ip.' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
 						admin_mail($subject, $subject, $headers, FALSE, 'admin_email_website_no_ips.tpl');
 					}
 				} else {
