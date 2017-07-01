@@ -61,7 +61,7 @@ class Plugin {
 			$accts = json_decode($whm->listips(), TRUE);
 			$freeips = [];
 			$sharedIps = [];
-			foreach ($accts['result'] as $idx => $ipdata) {
+			foreach (array_values($accts['result']) as $ipdata) {
 				if ($ipdata['mainaddr'] == '1')
 					$mainIp = $ipdata['ip'];
 				if ($ipdata['used'] == 0 && $ipdata['active'] == 1)
@@ -108,6 +108,63 @@ class Plugin {
 	public static function doDisable(\Service_Order $serviceOrder) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
+		$db = get_module_db(self::$module);
+		function_requirements('whm_api');
+		$ip = $serviceInfo[$settings['PREFIX'] . '_ip'];
+		$serverdata = get_service_master($serviceInfo['website_server'], self::$module);
+		$hash = $serverdata['website_key'];
+		$user = 'root';
+		$whm = new \xmlapi($serverdata['website_ip']);
+		//$whm->set_debug('true');
+		$whm->set_port('2087');
+		$whm->set_protocol('https');
+		$whm->set_output('json');
+		$whm->set_auth_type('hash');
+		$whm->set_user($user);
+		$whm->set_hash($hash);
+		$accts = obj2array(json_decode($whm->listips()));
+		$freeips = [];
+		$sharedIps = [];
+		foreach ($accts['result'] as $idx => $ipdata) {
+			if ($ipdata['mainaddr'] == 1)
+				$main_ip = $ipdata['ip'];
+			if ($ipdata['used'] == 0 && $ipdata['active'] == 1)
+				$freeips[] = $ipdata['ip'];
+			if ($ipdata['dedicated'] == 0)
+				$sharedIps[] = $ipdata['ip'];
+		}
+		// check if ip is main or additional/dedicated. if ip is main, get a new one
+		if (!in_array($ip, $sharedIps)) {
+			myadmin_log(self::$module, 'info', "IP {$ip} (Dedicated IP) Main IP {$main_ip}", __LINE__, __FILE__);
+			$new_ip = $sharedIps[0];
+			$response = $whm->setsiteip($new_ip, $serviceInfo[$settings['PREFIX'] . '_username']);
+			myadmin_log(self::$module, 'info', "WHM setsiteip({$new_ip}, {$serviceInfo[$settings['PREFIX'] . '_username']}) Response: {$response}", __LINE__, __FILE__);
+			$response = json_decode($response);
+			if ($response->result[0]->status == 1) {
+				// update db w/ new ip
+				$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='$main_ip' where {$settings['PREFIX']}_id={$db->Record['repeat_invoices_service']}", __LINE__, __FILE__);
+				myadmin_log(self::$module, 'info', "Gave Website {$db->Record['repeat_invoices_service']} Main IP $ip", __LINE__, __FILE__);
+			} else {
+				myadmin_log(self::$module, 'info', "Error Giving Website {$db->Record['repeat_invoices_service']} Main IP $ip", __LINE__, __FILE__);
+				$headers = '';
+				$headers .= 'MIME-Version: 1.0' . EMAIL_NEWLINE;
+				$headers .= 'Content-type: text/html; charset=UTF-8' . EMAIL_NEWLINE;
+				$headers .= 'From: ' . TITLE . ' <' . EMAIL_FROM . '>' . EMAIL_NEWLINE;
+				$subject = 'Error Reverting To Main IP ' . $ip . ' on ' . $settings['TBLNAME'] . ' ' . $serviceInfo[$settings['TITLE_FIELD']];
+				admin_mail($subject, $subject, $headers, false, 'admin_email_website_no_ips.tpl');
+			}
+		} else {
+			myadmin_log(self::$module, 'info', "IP {$ip} (Shared IP) Main IP {$main_ip}, no Change Needed", __LINE__, __FILE__);
+		}
+		sql_delete_by_id('repeat_invoices', $r, $custid, self::$module);
+		add_output('Dedicated IP Order Canceled');
+		$email = $settings['TBLNAME'] . ' ID: ' . $serviceInfo[$settings['PREFIX'] . '_id'] . '<br>' . $settings['TBLNAME'] . ' Hostname: ' . $serviceInfo[$settings['PREFIX'] . '_hostname'] . '<br>' . "Invoice: $r<br>" . "Description: {$db->Record['repeat_invoices_description']}<br>";
+		$subject = $settings['TBLNAME'] . ' ' . $db->Record['repeat_invoices_service'] . ' Canceled Dedicated IP';
+		$headers = '';
+		$headers .= 'MIME-Version: 1.0' . EMAIL_NEWLINE;
+		$headers .= 'Content-type: text/html; charset=UTF-8' . EMAIL_NEWLINE;
+		$headers .= 'From: ' . $settings['TITLE'] . ' <' . $settings['EMAIL_FROM'] . '>' . EMAIL_NEWLINE;
+		admin_mail($subject, $email, $headers, false, 'admin_email_website_ip_canceled.tpl');
 	}
 
 	public static function getSettings(GenericEvent $event) {
