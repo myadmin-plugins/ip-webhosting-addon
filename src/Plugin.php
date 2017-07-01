@@ -62,7 +62,7 @@ class Plugin {
 			foreach (array_values($accts['result']) as $ipData) {
 				if ($ipData['mainaddr'] == '1')
 					$mainIp = $ipData['ip'];
-				if ($ipData['used'] == 0 && $ipData['active'] == 1)
+				if ($ipData['used'] == 0 && $ipData['active'] == 1 && $ipData['dedicated'] == 1)
 					$freeips[] = $ipData['ip'];
 				if ($ipData['dedicated'] == 0)
 					$sharedIps[] = $ipData['ip'];
