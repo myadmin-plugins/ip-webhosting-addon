@@ -155,7 +155,7 @@ class Plugin {
 			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$mainIp}, no Change Needed", __LINE__, __FILE__);
 		}
 		add_output('Dedicated IP Order Canceled');
-		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname'].'<br>'."Invoice: $r<br>"."Description: {$db->Record['repeat_invoices_description']}<br>";
+		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname']."<br>Description: {$db->Record['repeat_invoices_description']}<br>";
 		$subject = $settings['TBLNAME'].' '.$db->Record['repeat_invoices_service'].' Canceled Dedicated IP';
 		$headers = '';
 		$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
