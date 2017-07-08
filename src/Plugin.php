@@ -6,12 +6,11 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Plugin {
 
-	public static $name = 'Dedicated IP Licensing Webhosting Addon';
-	public static $description = 'Allows selling of Dedicated IP Server and Webhosting License Types.  More info at https://www.netenberg.com/ips.php';
-	public static $help = 'It provides more than one million end users the ability to quickly install dozens of the leading open source content management systems into their web space.  	Must have a pre-existing cPanel license with cPanelDirect to purchase a ips license. Allow 10 minutes for activation.';
+	public static $name = 'Dedicated IP Webhosting Addon';
+	public static $description = 'Allows selling of Dedicated IP Addon for Webhosting.';
+	public static $help = '';
 	public static $module = 'webhosting';
 	public static $type = 'addon';
-
 
 	public function __construct() {
 	}
