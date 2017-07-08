@@ -102,7 +102,7 @@ class Plugin {
 		}
 	}
 
-	public static function doDisable(\Service_Order $serviceOrder) {
+	public static function doDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		$db = get_module_db(self::$module);
