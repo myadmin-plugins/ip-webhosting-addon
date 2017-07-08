@@ -75,6 +75,7 @@ class Plugin {
 					$response = json_decode($response);
 					if ($response->result[0]->status == 1) {
 						// update db w/ new ip
+						$db = get_module_db(self::$module);
 						$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$serviceInfo[$settings['PREFIX'].'_ip']}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
 						myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
 					} else {
