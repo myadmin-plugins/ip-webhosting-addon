@@ -40,10 +40,8 @@ class Plugin {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		if ($regexMatch === FALSE) {
-			$db = get_module_db(self::$module);
-			$db->query("select * from website_masters where website_id='{$serviceInfo[$settings['PREFIX'].'_server']}'", __LINE__, __FILE__);
-			$db->next_record(MYSQL_ASSOC);
-			$serverdata = $db->Record;
+			function_requirements('get_service_master');
+			$serverdata = get_service_master($serviceInfo[$settings['PREFIX'].'_server'], self::$module);
 			$hash = $serverdata[$settings['PREFIX'].'_key'];
 			$user = 'root';
 			function_requirements('whm_api');
@@ -107,7 +105,7 @@ class Plugin {
 		$settings = get_module_settings(self::$module);
 		$db = get_module_db(self::$module);
 		function_requirements('whm_api');
-		$serverdata = get_service_master($serviceInfo['website_server'], self::$module);
+		$serverdata = get_service_master($serviceInfo[$settings['PREFIX'].'_server'], self::$module);
 		$hash = $serverdata['website_key'];
 		$user = 'root';
 		$whm = new \xmlapi($serverdata['website_ip']);
@@ -139,10 +137,10 @@ class Plugin {
 			$response = json_decode($response);
 			if ($response->result[0]->status == 1) {
 				// update db w/ new ip
-				$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$mainIp}' where {$settings['PREFIX']}_id={$db->Record['repeat_invoices_service']}", __LINE__, __FILE__);
-				myadmin_log(self::$module, 'info', "Gave Website {$db->Record['repeat_invoices_service']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
+				$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$mainIp}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
+				myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
 			} else {
-				myadmin_log(self::$module, 'info', "Error Giving Website {$db->Record['repeat_invoices_service']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
+				myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
 				$headers = '';
 				$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
 				$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
@@ -154,8 +152,8 @@ class Plugin {
 			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$mainIp}, no Change Needed", __LINE__, __FILE__);
 		}
 		add_output('Dedicated IP Order Canceled');
-		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname']."<br>Description: {$db->Record['repeat_invoices_description']}<br>";
-		$subject = $settings['TBLNAME'].' '.$db->Record['repeat_invoices_service'].' Canceled Dedicated IP';
+		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname'].'<br>Description: '.self::$name.'<br>';
+		$subject = $settings['TBLNAME'].' '.$serviceInfo[$settings['PREFIX'].'_id'].' Canceled Dedicated IP';
 		$headers = '';
 		$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
 		$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
