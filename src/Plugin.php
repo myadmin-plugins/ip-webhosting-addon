@@ -87,7 +87,7 @@ class Plugin {
 			// check if ip is main or additional/dedicated.  if ip is main, get a new one
 			if (in_array($serviceInfo[$settings['PREFIX'].'_ip'], $sharedIps)) {
 				myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared) Main IP {$mainIp}", __LINE__, __FILE__);
-				if (sizeof($freeips) > 0) {
+				if (count($freeips) > 0) {
 					// assign new ip
 					$serviceInfo[$settings['PREFIX'].'_ip'] = $freeips[0];
 					$response = $whm->setsiteip($serviceInfo[$settings['PREFIX'].'_ip'], $serviceInfo[$settings['PREFIX'].'_username']);
