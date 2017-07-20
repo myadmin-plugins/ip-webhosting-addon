@@ -4,6 +4,11 @@ namespace Detain\MyAdminWebhostingIp;
 
 use Symfony\Component\EventDispatcher\GenericEvent;
 
+/**
+ * Class Plugin
+ *
+ * @package Detain\MyAdminWebhostingIp
+ */
 class Plugin {
 
 	public static $name = 'Dedicated IP Webhosting Addon';
@@ -12,9 +17,15 @@ class Plugin {
 	public static $module = 'webhosting';
 	public static $type = 'addon';
 
+	/**
+	 * Plugin constructor.
+	 */
 	public function __construct() {
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getHooks() {
 		return [
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
@@ -22,6 +33,9 @@ class Plugin {
 		];
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getAddon(GenericEvent $event) {
 		$service = $event->getSubject();
 		function_requirements('class.Addon');
@@ -36,6 +50,12 @@ class Plugin {
 		$service->addAddon($addon);
 	}
 
+	/**
+	 * @param \Service_Order $serviceOrder
+	 * @param                $repeatInvoiceId
+	 * @param bool           $regexMatch
+	 * @throws \Exception
+	 */
 	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
@@ -101,6 +121,12 @@ class Plugin {
 		}
 	}
 
+	/**
+	 * @param \Service_Order $serviceOrder
+	 * @param                $repeatInvoiceId
+	 * @param bool           $regexMatch
+	 * @throws \Exception
+	 */
 	public static function doDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
@@ -162,6 +188,9 @@ class Plugin {
 		admin_mail($subject, $email, $headers, FALSE, 'admin_email_website_ip_canceled.tpl');
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
 		$settings->add_text_setting(self::$module, 'Costs & Limits', 'website_ip_cost', 'Dedicated IP Cost:', 'This is the cost for purchasing an additional IP on top of a Website.', (defined(WEBSITE_IP_COST) ? WEBSITE_IP_COST : 3));
