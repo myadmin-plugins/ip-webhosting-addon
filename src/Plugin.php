@@ -24,7 +24,7 @@ class Plugin {
 	}
 
 	/**
-	 * @return array
+	 * @return array<string,string[]>
 	 */
 	public static function getHooks() {
 		return [
