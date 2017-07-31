@@ -44,8 +44,8 @@ class Plugin {
 			->set_text('Dedicated IP')
 			->set_text_match('Dedicated IP (.*)')
 			->set_cost(WEBSITE_IP_COST)
-			->set_enable([__CLASS__, 'doEnable'])
-			->set_disable([__CLASS__, 'doDisable'])
+			->setEnable([__CLASS__, 'doEnable'])
+			->setDisable([__CLASS__, 'doDisable'])
 			->register();
 		$service->addAddon($addon);
 	}
