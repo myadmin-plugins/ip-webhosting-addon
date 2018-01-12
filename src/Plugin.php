@@ -105,11 +105,11 @@ class Plugin {
 						$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
 						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
 						$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-						admin_mail($subject, $subject, $headers, FALSE, 'admin_email_website_no_ips.tpl');
+						admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
 					}
 				} else {
 					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
-					admin_mail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, FALSE, FALSE, 'admin_email_website_no_ips.tpl');
+					admin_mail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, FALSE, FALSE, 'admin/website_no_ips.tpl');
 					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__);
 				}
 			} else {
@@ -173,7 +173,7 @@ class Plugin {
 				$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
 				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
 				$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-				admin_mail($subject, $subject, $headers, FALSE, 'admin_email_website_no_ips.tpl');
+				admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
 			}
 		} else {
 			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$mainIp}, no Change Needed", __LINE__, __FILE__);
@@ -185,7 +185,7 @@ class Plugin {
 		$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
 		$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
 		$headers .= 'From: '.$settings['TITLE'].' <'.$settings['EMAIL_FROM'].'>'.EMAIL_NEWLINE;
-		admin_mail($subject, $email, $headers, FALSE, 'admin_email_website_ip_canceled.tpl');
+		admin_mail($subject, $email, $headers, FALSE, 'admin/website_ip_canceled.tpl');
 	}
 
 	/**
