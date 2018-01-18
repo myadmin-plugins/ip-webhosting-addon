@@ -24,5 +24,5 @@ composer require detain/myadmin-ip-webhosting-addon
 
 ## License
 
-The Dedicated IP Addon for Webhosting Module in MyAdmin class is licensed under the LGPL-v2 license.
+The Dedicated IP Addon for Webhosting Module in MyAdmin class is licensed under the LGPL-v2.1 license.
 
