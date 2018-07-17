@@ -104,9 +104,9 @@ class Plugin {
 					} else {
 						myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
 						$headers = '';
-						$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-						$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+						$headers .= 'MIME-Version: 1.0'.PHP_EOL;
+						$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
+						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 						$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
 						admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
 					}
@@ -172,9 +172,9 @@ class Plugin {
 			} else {
 				myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__);
 				$headers = '';
-				$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-				$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+				$headers .= 'MIME-Version: 1.0'.PHP_EOL;
+				$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
+				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 				$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
 				admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
 			}
@@ -185,9 +185,9 @@ class Plugin {
 		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname'].'<br>Description: '.self::$name.'<br>';
 		$subject = $settings['TBLNAME'].' '.$serviceInfo[$settings['PREFIX'].'_id'].' Canceled Dedicated IP';
 		$headers = '';
-		$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-		$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-		$headers .= 'From: '.$settings['TITLE'].' <'.$settings['EMAIL_FROM'].'>'.EMAIL_NEWLINE;
+		$headers .= 'MIME-Version: 1.0'.PHP_EOL;
+		$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
+		$headers .= 'From: '.$settings['TITLE'].' <'.$settings['EMAIL_FROM'].'>'.PHP_EOL;
 		admin_mail($subject, $email, $headers, FALSE, 'admin/website_ip_canceled.tpl');
 	}
 
