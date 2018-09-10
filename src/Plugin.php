@@ -9,8 +9,8 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  *
  * @package Detain\MyAdminWebhostingIp
  */
-class Plugin {
-
+class Plugin
+{
 	public static $name = 'Dedicated IP Webhosting Addon';
 	public static $description = 'Allows selling of Dedicated IP Addon for Webhosting.';
 	public static $help = '';
@@ -20,13 +20,15 @@ class Plugin {
 	/**
 	 * Plugin constructor.
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 	}
 
 	/**
 	 * @return array<string,string[]>
 	 */
-	public static function getHooks() {
+	public static function getHooks()
+	{
 		return [
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
 			self::$module.'.settings' => [__CLASS__, 'getSettings']
@@ -36,7 +38,8 @@ class Plugin {
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getAddon(GenericEvent $event) {
+	public static function getAddon(GenericEvent $event)
+	{
 		/**
 		 * @var \ServiceHandler $service
 		 */
@@ -59,10 +62,11 @@ class Plugin {
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doEnable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doEnable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = false)
+	{
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
-		if ($regexMatch === FALSE) {
+		if ($regexMatch === false) {
 			function_requirements('get_service_master');
 			$serverdata = get_service_master($serviceInfo[$settings['PREFIX'].'_server'], self::$module);
 			$hash = $serverdata[$settings['PREFIX'].'_key'];
@@ -76,16 +80,19 @@ class Plugin {
 			$whm->set_auth_type('hash');
 			$whm->set_user($user);
 			$whm->set_hash($hash);
-			$accts = json_decode($whm->listips(), TRUE);
+			$accts = json_decode($whm->listips(), true);
 			$freeips = [];
 			$sharedIps = [];
 			foreach (array_values($accts['result']) as $ipData) {
-				if ($ipData['mainaddr'] == '1')
+				if ($ipData['mainaddr'] == '1') {
 					$mainIp = $ipData['ip'];
-				if ($ipData['used'] == 0 && $ipData['active'] == 1 && $ipData['dedicated'] == 1)
+				}
+				if ($ipData['used'] == 0 && $ipData['active'] == 1 && $ipData['dedicated'] == 1) {
 					$freeips[] = $ipData['ip'];
-				if ($ipData['dedicated'] == 0)
+				}
+				if ($ipData['dedicated'] == 0) {
 					$sharedIps[] = $ipData['ip'];
+				}
 			}
 			// check if ip is main or additional/dedicated.  if ip is main, get a new one
 			if (in_array($serviceInfo[$settings['PREFIX'].'_ip'], $sharedIps)) {
@@ -108,11 +115,11 @@ class Plugin {
 						$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
 						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 						$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-						admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
+						admin_mail($subject, $subject, $headers, false, 'admin/website_no_ips.tpl');
 					}
 				} else {
 					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
-					admin_mail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, FALSE, FALSE, 'admin/website_no_ips.tpl');
+					admin_mail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, false, false, 'admin/website_no_ips.tpl');
 					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__);
 				}
 			} else {
@@ -130,7 +137,8 @@ class Plugin {
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doDisable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doDisable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = false)
+	{
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		$db = get_module_db(self::$module);
@@ -151,12 +159,15 @@ class Plugin {
 		$sharedIps = [];
 		$values = array_values($accts['result']);
 		foreach ($values as $ipData) {
-			if ($ipData['mainaddr'] == 1)
+			if ($ipData['mainaddr'] == 1) {
 				$mainIp = $ipData['ip'];
-			if ($ipData['used'] == 0 && $ipData['active'] == 1)
+			}
+			if ($ipData['used'] == 0 && $ipData['active'] == 1) {
 				$freeips[] = $ipData['ip'];
-			if ($ipData['dedicated'] == 0)
+			}
+			if ($ipData['dedicated'] == 0) {
 				$sharedIps[] = $ipData['ip'];
+			}
 		}
 		// check if ip is main or additional/dedicated. if ip is main, get a new one
 		if (!in_array($serviceInfo[$settings['PREFIX'].'_ip'], $sharedIps)) {
@@ -176,7 +187,7 @@ class Plugin {
 				$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
 				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 				$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-				admin_mail($subject, $subject, $headers, FALSE, 'admin/website_no_ips.tpl');
+				admin_mail($subject, $subject, $headers, false, 'admin/website_no_ips.tpl');
 			}
 		} else {
 			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$mainIp}, no Change Needed", __LINE__, __FILE__);
@@ -188,13 +199,14 @@ class Plugin {
 		$headers .= 'MIME-Version: 1.0'.PHP_EOL;
 		$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
 		$headers .= 'From: '.$settings['TITLE'].' <'.$settings['EMAIL_FROM'].'>'.PHP_EOL;
-		admin_mail($subject, $email, $headers, FALSE, 'admin/website_ip_canceled.tpl');
+		admin_mail($subject, $email, $headers, false, 'admin/website_ip_canceled.tpl');
 	}
 
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getSettings(GenericEvent $event) {
+	public static function getSettings(GenericEvent $event)
+	{
 		$settings = $event->getSubject();
 		$settings->add_text_setting(self::$module, 'Costs & Limits', 'website_ip_cost', 'Dedicated IP Cost:', 'This is the cost for purchasing an additional IP on top of a Website.', (defined(WEBSITE_IP_COST) ? WEBSITE_IP_COST : 3));
 	}
