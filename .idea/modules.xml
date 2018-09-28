@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/myadmin-ip-webhosting-addon.iml" filepath="$PROJECT_DIR$/.idea/myadmin-ip-webhosting-addon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ip-webhosting-addon.iml" filepath="$PROJECT_DIR$/.idea/ip-webhosting-addon.iml" />
     </modules>
   </component>
 </project>

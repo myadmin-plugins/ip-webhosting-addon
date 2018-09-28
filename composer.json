@@ -1,5 +1,5 @@
 {
-	"name": "detain/myadmin-ip-webhosting-addon",
+	"name": "detain/ip-webhosting-addon",
 	"type": "myadmin-plugin",
 	"description": "Dedicated IP Addon for Webhosting Module in MyAdmin",
 	"keywords": [
