@@ -110,16 +110,12 @@ class Plugin
 						myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
 					} else {
 						myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-						$headers = '';
-						$headers .= 'MIME-Version: 1.0'.PHP_EOL;
-						$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
-						$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 						$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-						admin_mail($subject, $subject, $headers, false, 'admin/website_no_ips.tpl');
+						(new MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
 					}
 				} else {
 					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
-					admin_mail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, false, false, 'admin/website_no_ips.tpl');
+					(new MyAdmin\Mail())->adminMail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, false, 'admin/website_no_ips.tpl');
 					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
 				}
 			} else {
@@ -182,12 +178,8 @@ class Plugin
 				myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
 			} else {
 				myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-				$headers = '';
-				$headers .= 'MIME-Version: 1.0'.PHP_EOL;
-				$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
-				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 				$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-				admin_mail($subject, $subject, $headers, false, 'admin/website_no_ips.tpl');
+				(new MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
 			}
 		} else {
 			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$mainIp}, no Change Needed", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
@@ -195,11 +187,7 @@ class Plugin
 		add_output('Dedicated IP Order Canceled');
 		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname'].'<br>Description: '.self::$name.'<br>';
 		$subject = $settings['TBLNAME'].' '.$serviceInfo[$settings['PREFIX'].'_id'].' Canceled Dedicated IP';
-		$headers = '';
-		$headers .= 'MIME-Version: 1.0'.PHP_EOL;
-		$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
-		$headers .= 'From: '.$settings['TITLE'].' <'.$settings['EMAIL_FROM'].'>'.PHP_EOL;
-		admin_mail($subject, $email, $headers, false, 'admin/website_ip_canceled.tpl');
+		(new MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/website_ip_canceled.tpl');
 	}
 
 	/**
