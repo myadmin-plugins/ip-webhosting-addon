@@ -69,16 +69,12 @@ class Plugin
 			'free' => [],
 			'shared' => []
 		];
-		if (in_array($serviceInfo[$settings['PREFIX'].'_type'], [get_service_define('WEB_DIRECTADMIN'), get_service_define('WEB_STORAGE')])) {
-
-		} else {
-			$accts = json_decode($whm->listips(), true);
-			foreach (array_values($accts['result']) as $ipData) {
-				if ($ipData['active'] == 1) {
-					if ($ipData['mainaddr'] == '1')
-						$ips['main'] = $ipData['ip'];
-					$ips[$ipData['dedicated'] == 0 ? 'shared' : ($ipData['used'] == 1 ? 'used' : 'free')][] = $ipData['ip'];
-				}
+		$accts = json_decode($whm->listips(), true);
+		foreach (array_values($accts['result']) as $ipData) {
+			if ($ipData['active'] == 1) {
+				if ($ipData['mainaddr'] == '1')
+					$ips['main'] = $ipData['ip'];
+				$ips[$ipData['dedicated'] == 0 ? 'shared' : ($ipData['used'] == 1 ? 'used' : 'free')][] = $ipData['ip'];
 			}
 		}
 		return $ips;
