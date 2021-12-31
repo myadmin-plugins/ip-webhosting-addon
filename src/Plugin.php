@@ -55,29 +55,33 @@ class Plugin
 			->register();
 		$service->addAddon($addon);
 	}
-	
+
 	/**
 	* returns a list of the ips for a server
-	* 
+	*
 	* @param \xmlapi $whm
 	* @return array the ip info
 	*/
 	public static function getIps(\xmlapi $whm) {
-		$accts = json_decode($whm->listips(), true);
 		$ips = [
-			'main' => '', 
-			'used' => [], 
-			'free' => [], 
+			'main' => '',
+			'used' => [],
+			'free' => [],
 			'shared' => []
 		];
-		foreach (array_values($accts['result']) as $ipData) {
-			if ($ipData['active'] == 1) {
-				if ($ipData['mainaddr'] == '1')
-					$ips['main'] = $ipData['ip'];
-				$ips[$ipData['dedicated'] == 0 ? 'shared' : ($ipData['used'] == 1 ? 'used' : 'free')][] = $ipData['ip'];
+		if (in_array($serviceInfo[$settings['PREFIX'].'_type'], [get_service_define('WEB_DIRECTADMIN'), get_service_define('WEB_STORAGE')])) {
+
+		} else {
+			$accts = json_decode($whm->listips(), true);
+			foreach (array_values($accts['result']) as $ipData) {
+				if ($ipData['active'] == 1) {
+					if ($ipData['mainaddr'] == '1')
+						$ips['main'] = $ipData['ip'];
+					$ips[$ipData['dedicated'] == 0 ? 'shared' : ($ipData['used'] == 1 ? 'used' : 'free')][] = $ipData['ip'];
+				}
 			}
 		}
-		return $ips;		
+		return $ips;
 	}
 
 	/**
@@ -93,44 +97,49 @@ class Plugin
 		if ($regexMatch === false) {
 			function_requirements('get_service_master');
 			$serverdata = get_service_master($serviceInfo[$settings['PREFIX'].'_server'], self::$module);
-			$hash = $serverdata[$settings['PREFIX'].'_key'];
-			$user = 'root';
-			function_requirements('whm_api');
-			$whm = new \xmlapi($serverdata[$settings['PREFIX'].'_ip']);
-			//$whm->set_debug('true');
-			$whm->set_port('2087');
-			$whm->set_protocol('https');
-			$whm->set_output('json');
-			$whm->set_auth_type('hash');
-			$whm->set_user($user);
-			$whm->set_hash($hash);
-			$ips = self::getIps($whm);
-			// check if ip is main or additional/dedicated.  if ip is main, get a new one
-			if (in_array($serviceInfo[$settings['PREFIX'].'_ip'], $ips['shared'])) {
-				myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-				if (count($ips['free']) > 0) {
-					// assign new ip
-					$serviceInfo[$settings['PREFIX'].'_ip'] = $ips['free'][0];
-					$response = $whm->setsiteip($serviceInfo[$settings['PREFIX'].'_ip'], $serviceInfo[$settings['PREFIX'].'_username']);
-					myadmin_log(self::$module, 'info', "WHM setsiteip({$serviceInfo[$settings['PREFIX'].'_ip']}, {$serviceInfo[$settings['PREFIX'].'_username']}) Response: {$response}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-					$response = json_decode($response);
-					if ($response->result[0]->status == 1) {
-						// update db w/ new ip
-						$db = get_module_db(self::$module);
-						$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$serviceInfo[$settings['PREFIX'].'_ip']}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
-						myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+			if (in_array($serviceInfo[$settings['PREFIX'].'_type'], [get_service_define('WEB_DIRECTADMIN'), get_service_define('WEB_STORAGE')])) {
+
+			} else {
+				$hash = $serverdata[$settings['PREFIX'].'_key'];
+				$user = 'root';
+				function_requirements('whm_api');
+				$whm = new \xmlapi($serverdata[$settings['PREFIX'].'_ip']);
+				//$whm->set_debug('true');
+				$whm->set_port('2087');
+				$whm->set_protocol('https');
+				$whm->set_output('json');
+				$whm->set_auth_type('hash');
+				$whm->set_user($user);
+				$whm->set_hash($hash);
+				$ips = self::getIps($whm);
+				// check if ip is main or additional/dedicated.  if ip is main, get a new one
+				if (in_array($serviceInfo[$settings['PREFIX'].'_ip'], $ips['shared'])) {
+					myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+					if (count($ips['free']) > 0) {
+						// assign new ip
+						$serviceInfo[$settings['PREFIX'].'_ip'] = $ips['free'][0];
+						$response = $whm->setsiteip($serviceInfo[$settings['PREFIX'].'_ip'], $serviceInfo[$settings['PREFIX'].'_username']);
+						myadmin_log(self::$module, 'info', "WHM setsiteip({$serviceInfo[$settings['PREFIX'].'_ip']}, {$serviceInfo[$settings['PREFIX'].'_username']}) Response: {$response}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+						$response = json_decode($response);
+						if ($response->result[0]->status == 1) {
+							// update db w/ new ip
+							$db = get_module_db(self::$module);
+							$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$serviceInfo[$settings['PREFIX'].'_ip']}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
+							myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+						} else {
+							myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+							$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
+							(new \MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
+						}
 					} else {
-						myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-						$subject = 'Error Setting IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-						(new \MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
+						$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
+						(new \MyAdmin\Mail())->adminMail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, false, 'admin/website_no_ips.tpl');
+						myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
 					}
 				} else {
-					$subject = "0 Free IPs On {$settings['TBLNAME']} Server {$serverdata[$settings['PREFIX'].'_name']}";
-					(new \MyAdmin\Mail())->adminMail($subject, "webserver {$serviceInfo[$settings['PREFIX'].'_id']} Has Pending IPS<br>\n".$subject, false, 'admin/website_no_ips.tpl');
-					myadmin_log(self::$module, 'info', $subject, __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+					myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Already Dedicated) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
 				}
-			} else {
-				myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Already Dedicated) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+
 			}
 		} else {
 			$serviceInfo[$settings['PREFIX'].'_ip'] = $regexMatch;
@@ -151,35 +160,39 @@ class Plugin
 		$db = get_module_db(self::$module);
 		function_requirements('whm_api');
 		$serverdata = get_service_master($serviceInfo[$settings['PREFIX'].'_server'], self::$module);
-		$hash = $serverdata['website_key'];
-		$user = 'root';
-		$whm = new \xmlapi($serverdata['website_ip']);
-		//$whm->set_debug('true');
-		$whm->set_port('2087');
-		$whm->set_protocol('https');
-		$whm->set_output('json');
-		$whm->set_auth_type('hash');
-		$whm->set_user($user);
-		$whm->set_hash($hash);
-		$ips = self::getIps($whm);
-		// check if ip is main or additional/dedicated. if ip is main, get a new one
-		if (!in_array($serviceInfo[$settings['PREFIX'].'_ip'], $ips['shared'])) {
-			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Dedicated IP) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-			$newIp = $ips['shared'][0];
-			$response = $whm->setsiteip($newIp, $serviceInfo[$settings['PREFIX'].'_username']);
-			myadmin_log(self::$module, 'info', "WHM setsiteip({$newIp}, {$serviceInfo[$settings['PREFIX'].'_username']}) Response: {$response}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-			$response = json_decode($response);
-			if ($response->result[0]->status == 1) {
-				// update db w/ new ip
-				$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$ips['main']}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
-				myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-			} else {
-				myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-				$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
-				(new \MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
-			}
+		if (in_array($serviceInfo[$settings['PREFIX'].'_type'], [get_service_define('WEB_DIRECTADMIN'), get_service_define('WEB_STORAGE')])) {
+
 		} else {
-			myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$ips['main']}, no Change Needed", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+			$hash = $serverdata['website_key'];
+			$user = 'root';
+			$whm = new \xmlapi($serverdata['website_ip']);
+			//$whm->set_debug('true');
+			$whm->set_port('2087');
+			$whm->set_protocol('https');
+			$whm->set_output('json');
+			$whm->set_auth_type('hash');
+			$whm->set_user($user);
+			$whm->set_hash($hash);
+			$ips = self::getIps($whm);
+			// check if ip is main or additional/dedicated. if ip is main, get a new one
+			if (!in_array($serviceInfo[$settings['PREFIX'].'_ip'], $ips['shared'])) {
+				myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Dedicated IP) Main IP {$ips['main']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+				$newIp = $ips['shared'][0];
+				$response = $whm->setsiteip($newIp, $serviceInfo[$settings['PREFIX'].'_username']);
+				myadmin_log(self::$module, 'info', "WHM setsiteip({$newIp}, {$serviceInfo[$settings['PREFIX'].'_username']}) Response: {$response}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+				$response = json_decode($response);
+				if ($response->result[0]->status == 1) {
+					// update db w/ new ip
+					$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$ips['main']}' where {$settings['PREFIX']}_id={$serviceInfo[$settings['PREFIX'].'_id']}", __LINE__, __FILE__);
+					myadmin_log(self::$module, 'info', "Gave Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+				} else {
+					myadmin_log(self::$module, 'info', "Error Giving Website {$serviceInfo[$settings['PREFIX'].'_id']} Main IP {$serviceInfo[$settings['PREFIX'].'_ip']}", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+					$subject = 'Error Reverting To Main IP '.$serviceInfo[$settings['PREFIX'].'_ip'].' on '.$settings['TBLNAME'].' '.$serviceInfo[$settings['TITLE_FIELD']];
+					(new \MyAdmin\Mail())->adminMail($subject, $subject, false, 'admin/website_no_ips.tpl');
+				}
+			} else {
+				myadmin_log(self::$module, 'info', "ip {$serviceInfo[$settings['PREFIX'].'_ip']} (Shared IP) Main IP {$ips['main']}, no Change Needed", __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
+			}
 		}
 		add_output('Dedicated IP Order Canceled');
 		$email = $settings['TBLNAME'].' ID: '.$serviceInfo[$settings['PREFIX'].'_id'].'<br>'.$settings['TBLNAME'].' Hostname: '.$serviceInfo[$settings['PREFIX'].'_hostname'].'<br>Description: '.self::$name.'<br>';
