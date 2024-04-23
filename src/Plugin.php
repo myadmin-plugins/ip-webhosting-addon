@@ -71,6 +71,7 @@ class Plugin
             'shared' => []
         ];
         $accts = json_decode($whm->listips(), true);
+	if (isset($accts['result'])) {
         foreach (array_values($accts['result']) as $ipData) {
             if ($ipData['active'] == 1) {
                 if ($ipData['mainaddr'] == '1') {
@@ -79,6 +80,7 @@ class Plugin
                 $ips[$ipData['dedicated'] == 0 ? 'shared' : ($ipData['used'] == 1 ? 'used' : 'free')][] = $ipData['ip'];
             }
         }
+	}
         return $ips;
     }
 
