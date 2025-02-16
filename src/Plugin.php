@@ -206,6 +206,8 @@ class Plugin
          * @var \MyAdmin\Settings $settings
          **/
         $settings = $event->getSubject();
+        $settings->setTarget('module');
         $settings->add_text_setting(self::$module, _('Costs & Limits'), 'website_ip_cost', _('Dedicated IP Cost'), _('This is the cost for purchasing an additional IP on top of a Website.'), (defined(WEBSITE_IP_COST) ? WEBSITE_IP_COST : 3));
+        $settings->setTarget('global');
     }
 }
