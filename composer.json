@@ -27,14 +27,9 @@
 		"ext-soap": "*",
 		"symfony/event-dispatcher": "^5.0@stable",
 		"detain/myadmin-plugin-installer": "dev-master"
-    },
+	},
 	"require-dev": {
-		"phpunit/phpunit": "*",
-		"phpunit/phpunit-mock-objects": "*",
-		"vlucas/phpdotenv": "*",
-		"codeclimate/php-test-reporter": "dev-master",
-		"satooshi/php-coveralls": "*",
-		"codacy/coverage": "dev-master"
+		"phpunit/phpunit": "^9.6"
 	},
 	"repositories": [
 		{
@@ -53,6 +48,11 @@
 	"autoload": {
 		"psr-4": {
 			"Detain\\MyAdminWebhostingIp\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Detain\\MyAdminWebhostingIp\\Tests\\": "tests/"
 		}
 	}
 }
