@@ -1,6 +1,6 @@
 ---
 name: plugin-unit-test
-description: Writes PHPUnit ^9.6 test cases in `tests/PluginTest.php` for the `Plugin` class static methods. Use when user says 'add test', 'write test', 'test getHooks', 'add coverage', or wants tests for `src/Plugin.php`. Bootstrap is `vendor/autoload.php`, run via `vendor/bin/phpunit`. Do NOT use for integration tests requiring a live WHM server or real DB connections. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Writes PHPUnit ^9.6 test cases in `tests/PluginTest.php` for the `Plugin` class static methods. Use when user says 'add test', 'write test', 'test getHooks', 'add coverage', or wants tests for `src/Plugin.php`. Bootstrap is `vendor/autoload.php`, run via `vendor/bin/phpunit`. Do NOT use for integration tests requiring a live WHM server or real DB connections. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file

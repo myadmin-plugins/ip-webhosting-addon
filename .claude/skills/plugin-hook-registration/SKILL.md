@@ -1,6 +1,6 @@
 ---
 name: plugin-hook-registration
-description: Adds a new Symfony EventDispatcher hook to src/Plugin.php in the myadmin-ip-webhosting-addon plugin. Use when user says 'add hook', 'register event', 'listen to webhosting event', 'add a new hook key to getHooks', or needs a new static handler method. Generates the getHooks() array entry and the corresponding static handler method with GenericEvent $event signature. Do NOT use for modifying existing hook handlers (getAddon, getSettings) or for non-Plugin.php event wiring. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds a new Symfony EventDispatcher hook to src/Plugin.php in the myadmin-ip-webhosting-addon plugin. Use when user says 'add hook', 'register event', 'listen to webhosting event', 'add a new hook key to getHooks', or needs a new static handler method. Generates the getHooks() array entry and the corresponding static handler method with GenericEvent $event signature. Do NOT use for modifying existing hook handlers (getAddon, getSettings) or for non-Plugin.php event wiring. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file
